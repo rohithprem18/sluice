@@ -1,0 +1,11 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+// `npm run dev` proxies the API to a local `uvicorn sluice.app:app` on :8000.
+// On Vercel the same paths are rewritten to the Python function.
+const api = "http://localhost:8000";
+
+export default defineConfig({
+  plugins: [react()],
+  server: { port: 5175, proxy: { "/api": api, "/v1": api } },
+});
