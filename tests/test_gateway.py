@@ -140,3 +140,23 @@ def test_threshold_per_embedding_model(svc):
     assert c.threshold_for("unknown") == 0.98
     c.threshold = 0.9
     assert c.threshold_for("gemini-embedding-2") == 0.9
+
+
+@pytest.mark.asyncio
+async def test_model_specific_400_falls_back_without_hurting_health(svc, upstream, monkeypatch):
+    import httpx
+
+    orig = upstream.handler
+
+    def handler(request):
+        if b"gpt-oss-120b" in request.content:
+            return httpx.Response(
+                400, json={"error": {"code": "tool_use_failed", "message": "model did not call a tool"}}
+            )
+        return orig(request)
+
+    upstream.handler = handler
+    svc.gateway.client._client._transport = httpx.MockTransport(handler)
+    r = await svc.gateway.complete(req(), Context("t", Options(cache=False)))
+    assert r["sluice"]["served_by"] == "gemini/gemini-3.8-flash"
+    assert (await svc.router.health())["groq/openai/gpt-oss-120b"].failures == 0

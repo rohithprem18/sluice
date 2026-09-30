@@ -42,10 +42,13 @@ class Deployment:
 
 
 class UpstreamError(Exception):
-    def __init__(self, status: int, message: str, retryable: bool):
+    def __init__(self, status: int, message: str, retryable: bool, model_fault: bool = False):
         super().__init__(message)
         self.status = status
         self.retryable = retryable
+        # the request was fine but this model could not serve it (e.g. a malformed tool call);
+        # another model can, and the provider's health should not suffer for it
+        self.model_fault = model_fault
 
 
 def providers(s: Settings) -> dict[str, Provider]:
@@ -77,8 +80,26 @@ def catalog(s: Settings) -> list[Deployment]:
     return [d for d in rows if d.provider.enabled]
 
 
+# 400s that describe a model limitation rather than a bad request
+MODEL_FAULTS = (
+    "tool_use_failed",
+    "thought_signature",
+    "does not support tools",
+    "tool calling is not supported",
+    "function calling is not enabled",
+    "failed_generation",
+)
+
+
 def _retryable(status: int) -> bool:
     return status == 429 or status >= 500 or status in (408, 409)
+
+
+def _error(dep: Deployment, status: int, text: str) -> UpstreamError:
+    model_fault = status in (400, 422) and any(m in text for m in MODEL_FAULTS)
+    return UpstreamError(
+        status, f"{dep.id} returned {status}: {text[:300]}", _retryable(status) or model_fault, model_fault
+    )
 
 
 class OpenAIClient:
@@ -125,9 +146,7 @@ class OpenAIClient:
         except httpx.HTTPError as e:
             raise UpstreamError(502, f"{dep.id} unreachable: {e.__class__.__name__}", True) from e
         if r.status_code >= 400:
-            raise UpstreamError(
-                r.status_code, f"{dep.id} returned {r.status_code}: {r.text[:300]}", _retryable(r.status_code)
-            )
+            raise _error(dep, r.status_code, r.text)
         data = r.json()
         if not data.get("choices"):
             raise UpstreamError(502, f"{dep.id} returned no choices", True)
@@ -150,9 +169,7 @@ class OpenAIClient:
         try:
             if r.status_code >= 400:
                 text = (await r.aread()).decode(errors="replace")
-                raise UpstreamError(
-                    r.status_code, f"{dep.id} returned {r.status_code}: {text[:300]}", _retryable(r.status_code)
-                )
+                raise _error(dep, r.status_code, text)
             async for line in r.aiter_lines():
                 if not line.startswith("data:"):
                     continue

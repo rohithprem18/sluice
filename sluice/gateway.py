@@ -337,9 +337,9 @@ class Gateway:
                     {"deployment": dep.id, "ok": False, "ms": round(ms, 1), "status": e.status, "error": str(e)[:160]}
                 )
                 last = e
-                if e.status in CLIENT_ERRORS:
-                    break
-                if not isinstance(e, SimulatedOutage):
+                if not e.retryable:
+                    break  # the request itself is invalid: another model would reject it too
+                if not isinstance(e, SimulatedOutage) and not e.model_fault:
                     await self.router.record(dep, False, ms, p.health.get(dep.id))
                 continue
             ms = (time.perf_counter() - t) * 1000
@@ -515,9 +515,9 @@ class Gateway:
                     "simulated": isinstance(e, SimulatedOutage),
                 }
                 last = e
-                if e.status in CLIENT_ERRORS:
-                    break
-                if not isinstance(e, SimulatedOutage):
+                if not e.retryable:
+                    break  # the request itself is invalid: another model would reject it too
+                if not isinstance(e, SimulatedOutage) and not e.model_fault:
                     await self.router.record(dep, False, ms, p.health.get(dep.id))
                 continue
             tail = restorer.flush()
