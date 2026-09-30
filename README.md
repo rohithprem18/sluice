@@ -76,6 +76,8 @@ flowchart LR
 
 **PII redaction.** Emails, phone numbers, card numbers (Luhn-checked), Aadhaar (Verhoeff-checked), PAN, SSN, IBAN, IP addresses and API keys become typed placeholders (`<CARD_1>`) before the prompt leaves. The model answers in placeholders, and Sluice restores the originals on the way back, including inside streamed tokens split across chunks. The cache only ever stores redacted text.
 
+**Tool calling across providers.** Requests that include tools only go to models with structured tool calling. When a fallback happens mid-conversation, the tool-call history is translated for the next provider (Gemini 3 needs a thought signature on every tool call; other providers reject Gemini's extra fields). A 400 that describes a model limitation rather than a bad request (a malformed tool call, a missing signature) moves to the next model without hurting the provider's health. [Triage](https://github.com/rohithprem18/triage) runs full tool-calling investigations through Sluice on this basis.
+
 **Injection screening.** The latest user turn is scored by Meta's Llama Prompt Guard 2 (free on Groq). Scores of 0.9 and above are rejected with a 403 before any model sees them.
 
 **Limits and telemetry.** Each client key gets its own per-minute limit; the public playground is limited per IP and per day. Every request is logged with its route, attempts, cache result, PII counts and tokens, and aggregated per minute for the console.
@@ -171,7 +173,7 @@ sluice/
 ├── api/index.py        # Vercel entry point
 ├── web/                # React + Vite console
 ├── bench/              # cache calibration and resilience benchmarks, with results
-└── tests/              # 35 tests: scripted providers, fake embedder, no network
+└── tests/              # 38 tests: scripted providers, fake embedder, no network
 ```
 
 ## Development
@@ -182,6 +184,11 @@ cd web && npm run build            # type-check + build the console
 ```
 
 CI runs both on every push.
+
+## Used by
+
+- [Quarry](https://github.com/rohithprem18/quarry): Text-to-SQL on BIRD, every model call through Sluice.
+- [Triage](https://github.com/rohithprem18/triage): tool-calling incident-response agent.
 
 ## Limitations
 
