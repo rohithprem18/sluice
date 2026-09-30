@@ -106,12 +106,14 @@ class Router:
         elif pinned:
             reason = f"pinned to {pinned.id}"
         health = await self.health()
-        pool = [d for d in self.deployments if d.tier == tier] or list(self.deployments)
+        # requests with tools only go to deployments that return structured tool calls
+        capable = [d for d in self.deployments if d.tools] if payload.get("tools") else list(self.deployments)
+        pool = [d for d in capable if d.tier == tier] or capable or list(self.deployments)
         ranked = sorted(pool, key=lambda d: (health[d.id].is_open, health[d.id].latency_ms, pool.index(d)))
         if pinned:
             ranked = [pinned] + [d for d in ranked if d.id != pinned.id]
         # the other tier as a last resort, so a request never dies while anything is up
-        ranked += [d for d in sorted(self.deployments, key=lambda d: health[d.id].latency_ms) if d not in ranked]
+        ranked += [d for d in sorted(capable, key=lambda d: health[d.id].latency_ms) if d not in ranked]
         live = [d for d in ranked if not health[d.id].is_open]
         skipped = [d.id for d in ranked if health[d.id].is_open]
         return Plan(tier, reason, live or ranked, skipped, health)

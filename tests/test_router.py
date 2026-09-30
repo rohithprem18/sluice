@@ -44,3 +44,10 @@ async def test_latency_ewma_reorders(svc):
     await svc.router.record(fast[1], True, 200)
     plan = await svc.router.plan({"model": "sluice/fast", "messages": []})
     assert plan.candidates[0].id == fast[1].id
+
+
+@pytest.mark.asyncio
+async def test_tool_requests_skip_models_without_tool_calling(svc):
+    plan = await svc.router.plan({"model": "sluice/smart", "messages": [], "tools": [{"type": "function"}]})
+    assert plan.candidates and all(d.tools for d in plan.candidates)
+    assert not any(d.provider.name == "openrouter" for d in plan.candidates)

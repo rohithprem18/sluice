@@ -35,6 +35,7 @@ class Deployment:
     # request fields applied only when the caller did not set them, e.g. keeping
     # reasoning models from spending the whole max_tokens budget on hidden thinking
     defaults: tuple[tuple[str, object], ...] = ()
+    tools: bool = True  # structured tool calling; requests with tools only go to deployments that support it
 
     @property
     def id(self) -> str:
@@ -70,11 +71,11 @@ def catalog(s: Settings) -> list[Deployment]:
         Deployment(p["groq"], "openai/gpt-oss-120b", "smart", 131_072, low),
         Deployment(p["gemini"], "gemini-3.8-flash", "smart", 1_000_000, low),
         Deployment(p["groq"], "qwen/qwen3.8-27b", "smart", 131_072, (("reasoning_effort", "none"),)),
-        Deployment(p["openrouter"], "nvidia/nemotron-3-super-120b-a12b:free", "smart", 131_072),
+        Deployment(p["openrouter"], "nvidia/nemotron-3-super-120b-a12b:free", "smart", 131_072, tools=False),
         Deployment(p["groq"], "openai/gpt-oss-20b", "fast", 131_072, low),
         Deployment(p["gemini"], "gemini-3.6-flash", "fast", 1_000_000, low),
         Deployment(p["gemini"], "gemini-3.5-flash-lite", "fast", 1_000_000, low),
-        Deployment(p["openrouter"], "google/gemma-4-31b-it:free", "fast", 131_072),
+        Deployment(p["openrouter"], "google/gemma-4-31b-it:free", "fast", 131_072, tools=False),
         Deployment(p["cerebras"], "gpt-oss-120b", "smart", 65_536, low),
     ]
     return [d for d in rows if d.provider.enabled]
