@@ -1,0 +1,72 @@
+{
+  "dataset": "GLUE QQP validation",
+  "pairs": 400,
+  "duplicates": 200,
+  "embedding": "gemini-embedding-2 (768d)",
+  "score": "(1 + cosine) / 2",
+  "thresholds": [
+    {
+      "threshold": 0.9,
+      "hits": 302,
+      "precision": 0.6589,
+      "recall": 0.995,
+      "false_hits": 103
+    },
+    {
+      "threshold": 0.93,
+      "hits": 249,
+      "precision": 0.739,
+      "recall": 0.92,
+      "false_hits": 65
+    },
+    {
+      "threshold": 0.95,
+      "hits": 202,
+      "precision": 0.8267,
+      "recall": 0.835,
+      "false_hits": 35
+    },
+    {
+      "threshold": 0.96,
+      "hits": 161,
+      "precision": 0.8571,
+      "recall": 0.69,
+      "false_hits": 23
+    },
+    {
+      "threshold": 0.97,
+      "hits": 105,
+      "precision": 0.9238,
+      "recall": 0.485,
+      "false_hits": 8
+    },
+    {
+      "threshold": 0.975,
+      "hits": 82,
+      "precision": 0.9268,
+      "recall": 0.38,
+      "false_hits": 6
+    },
+    {
+      "threshold": 0.98,
+      "hits": 66,
+      "precision": 0.9545,
+      "recall": 0.315,
+      "false_hits": 3
+    },
+    {
+      "threshold": 0.985,
+      "hits": 48,
+      "precision": 0.9375,
+      "recall": 0.225,
+      "false_hits": 3
+    },
+    {
+      "threshold": 0.99,
+      "hits": 26,
+      "precision": 0.9615,
+      "recall": 0.125,
+      "false_hits": 1
+    }
+  ]
+}

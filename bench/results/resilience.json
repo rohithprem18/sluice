@@ -1,0 +1,50 @@
+{
+  "url": "https://sluice-orcin.vercel.app",
+  "n": 12,
+  "scenarios": {
+    "baseline": {
+      "requests": 12,
+      "succeeded": 12,
+      "gateway_p50_ms": 472.6,
+      "gateway_p95_ms": 3033.9,
+      "overhead_p50_ms": 162.6,
+      "served_by": {
+        "groq/openai/gpt-oss-20b": 12
+      },
+      "avg_attempts": 1
+    },
+    "cache_hit": {
+      "requests": 12,
+      "succeeded": 12,
+      "gateway_p50_ms": 8.5,
+      "gateway_p95_ms": 10.7,
+      "overhead_p50_ms": null,
+      "served_by": {
+        "groq/openai/gpt-oss-20b": 12
+      },
+      "avg_attempts": 0
+    },
+    "outage_groq": {
+      "requests": 12,
+      "succeeded": 12,
+      "gateway_p50_ms": 900.6,
+      "gateway_p95_ms": 3452.3,
+      "overhead_p50_ms": 163.6,
+      "served_by": {
+        "gemini/gemini-3.5-flash-lite": 12
+      },
+      "avg_attempts": 2
+    },
+    "outage_groq_gemini": {
+      "requests": 12,
+      "succeeded": 12,
+      "gateway_p50_ms": 1379.6,
+      "gateway_p95_ms": 4874.5,
+      "overhead_p50_ms": 169.6,
+      "served_by": {
+        "openrouter/nvidia/nemotron-3-super-120b-a12b:free": 12
+      },
+      "avg_attempts": 5.83
+    }
+  }
+}
