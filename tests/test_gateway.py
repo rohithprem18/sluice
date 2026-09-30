@@ -160,3 +160,31 @@ async def test_model_specific_400_falls_back_without_hurting_health(svc, upstrea
     r = await svc.gateway.complete(req(), Context("t", Options(cache=False)))
     assert r["sluice"]["served_by"] == "gemini/gemini-3.8-flash"
     assert (await svc.router.health())["groq/openai/gpt-oss-120b"].failures == 0
+
+
+def test_tool_history_adapted_per_provider():
+    from sluice.providers import GEMINI_PLACEHOLDER_SIGNATURE, adapt_tool_history
+
+    history = [
+        {"role": "user", "content": "hi"},
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {"id": "a", "type": "function", "function": {"name": "f", "arguments": "{}"}},
+                {
+                    "id": "b",
+                    "type": "function",
+                    "function": {"name": "g", "arguments": "{}"},
+                    "extra_content": {"google": {"thought_signature": "real-sig"}},
+                },
+            ],
+        },
+        {"role": "tool", "tool_call_id": "a", "content": "ok"},
+    ]
+    gem = adapt_tool_history("gemini", history)[1]["tool_calls"]
+    assert gem[0]["extra_content"]["google"]["thought_signature"] == GEMINI_PLACEHOLDER_SIGNATURE
+    assert gem[1]["extra_content"]["google"]["thought_signature"] == "real-sig"  # real signatures are kept
+    groq = adapt_tool_history("groq", history)[1]["tool_calls"]
+    assert all("extra_content" not in tc for tc in groq)
+    assert "extra_content" in history[1]["tool_calls"][1]  # the caller's history is not mutated

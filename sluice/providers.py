@@ -103,6 +103,36 @@ def _error(dep: Deployment, status: int, text: str) -> UpstreamError:
     )
 
 
+# Gemini 3 requires a thought signature on every tool call in the conversation history.
+# Calls made by another model (after a fallback) have none; Google documents this
+# placeholder for tool calls Gemini did not generate.
+GEMINI_PLACEHOLDER_SIGNATURE = "skip_thought_signature_validator"
+
+
+def adapt_tool_history(provider: str, messages: list[dict]) -> list[dict]:
+    """Make a multi-provider tool-calling history acceptable to `provider`."""
+    if not any(m.get("tool_calls") for m in messages):
+        return messages
+    out = []
+    for m in messages:
+        calls = m.get("tool_calls")
+        if not calls:
+            out.append(m)
+            continue
+        fixed = []
+        for tc in calls:
+            tc = dict(tc)
+            if provider == "gemini":
+                google = dict((tc.get("extra_content") or {}).get("google") or {})
+                google.setdefault("thought_signature", GEMINI_PLACEHOLDER_SIGNATURE)
+                tc["extra_content"] = {**(tc.get("extra_content") or {}), "google": google}
+            else:
+                tc.pop("extra_content", None)  # Gemini-only field; strict providers reject it
+            fixed.append(tc)
+        out.append({**m, "tool_calls": fixed})
+    return out
+
+
 class OpenAIClient:
     """Minimal async client for any OpenAI-compatible endpoint."""
 
@@ -133,6 +163,8 @@ class OpenAIClient:
         body["stream"] = stream
         if stream:
             body["stream_options"] = {"include_usage": True}
+        if "messages" in body:
+            body["messages"] = adapt_tool_history(dep.provider.name, body["messages"])
         return body
 
     async def chat(self, dep: Deployment, payload: dict) -> dict:
