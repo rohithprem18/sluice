@@ -1,0 +1,20 @@
+[project]
+name = "sluice"
+version = "1.0.0"
+description = "OpenAI-compatible LLM gateway: routing and fallback across free providers, semantic cache, PII redaction"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = ["fastapi==0.115.6", "httpx==0.28.1"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
