@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="docs/playground-fallback.png" alt="Sluice playground: Groq is down, Gemini is overloaded, and the request still succeeds through OpenRouter" width="100%">
+  <img src="docs/banner.png" alt="Sluice" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://sluice-orcin.vercel.app"><img src="https://img.shields.io/badge/%E2%96%B6%20Live%20demo-sluice--orcin.vercel.app-ffffff?style=for-the-badge&labelColor=0a0a0a" alt="Live demo"></a>
 </p>
 
 <p align="center">
@@ -15,7 +19,12 @@
 
 **Health-Aware LLM Routing with Semantic Caching and PII Redaction.** Sluice puts one OpenAI-compatible endpoint in front of several free LLM providers (Groq, Google Gemini, OpenRouter). Every request is screened for prompt injection, stripped of personal data, answered from cache when the question has been asked before, and otherwise routed to the fastest healthy model, with automatic fallback when a provider fails. Point any OpenAI SDK at it by changing one line.
 
-**Live demo:** https://sluice-orcin.vercel.app. The Playground lets you switch providers off and watch the fallback happen.
+**Live demo: https://sluice-orcin.vercel.app** · open the Playground, switch a provider off, and watch the request fail over.
+
+<p align="center">
+  <a href="https://sluice-orcin.vercel.app/#/playground"><img src="docs/playground-fallback.png" alt="Groq switched off and Gemini overloaded: the request still succeeds through OpenRouter" width="100%"></a>
+  <br><sub>A real request from the live demo: Groq switched off, Gemini 3.8 Flash overloaded (503), answered by OpenRouter.</sub>
+</p>
 
 ## Results
 
