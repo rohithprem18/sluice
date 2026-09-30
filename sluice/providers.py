@@ -89,6 +89,7 @@ MODEL_FAULTS = (
     "tool calling is not supported",
     "function calling is not enabled",
     "failed_generation",
+    "ending with a model turn",
 )
 
 
