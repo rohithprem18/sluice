@@ -1,6 +1,8 @@
-/* Sluice console. Design tokens follow the xAI-inspired system: one near-black
-   canvas, weight-400 type with tight display tracking, uppercase mono labels,
-   translucent-white pill outlines, hairline cards, no shadows, dark only. */
+/* Sluice console. Design tokens follow the xAI-inspired system: a near-black
+   canvas by default, weight-400 type with tight display tracking, uppercase mono
+   labels, translucent pill outlines, hairline cards, no shadows; a light palette
+   lives under :root[data-theme="light"] and follows prefers-color-scheme unless
+   the user picked a theme (see index.html + useTheme). */
 
 :root {
   --canvas: #0a0a0a;
@@ -32,6 +34,57 @@
   --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --nav-h: 56px;
   --radius: 8px;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Light theme: same tokens, light values. Applied via data-theme="light", which the
+   inline script in index.html sets from localStorage or prefers-color-scheme. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --canvas: #f6f7f9;
+  --canvas-soft: #eceef2;
+  --canvas-card: #ffffff;
+  --canvas-mid: #d4d8de;
+  --hairline: #dde1e6;
+  --pill-line: rgba(16, 18, 22, 0.28);
+  --pill-line-hover: rgba(16, 18, 22, 0.6);
+  --ink: #101216;
+  --body: #2c3138;
+  --mute: #5d646d;
+  --sunset: #d95f02;
+  --sunset-soft: #9a4300;
+  --dusk: #6d28d9;
+  --twilight: #5b21b6;
+  --breeze: #2563eb;
+
+  /* status (always paired with a text label) */
+  --good: #15803d;
+  --warn: #b45309;
+  --bad: #dc2626;
+
+  /* chart series */
+  --series-upstream: #9aa1ab;
+  --series-cache: #ea580c;
+}
+
+/* accents that were hardcoded for the dark canvas */
+:root[data-theme="light"] ::selection {
+  background: rgba(16, 18, 22, 0.15);
+}
+:root[data-theme="light"] tbody tr:hover {
+  background: rgba(16, 18, 22, 0.04);
+}
+:root[data-theme="light"] tbody tr.selected {
+  background: rgba(16, 18, 22, 0.08);
+}
+:root[data-theme="light"] .skeleton {
+  background: linear-gradient(90deg, var(--canvas-soft), #d8dbe0, var(--canvas-soft));
 }
 
 * { box-sizing: border-box; }

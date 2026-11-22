@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Navbar } from "./components/Navbar";
-import { useHealth, useRoute } from "./hooks";
+import { useHealth, useRoute, useTheme } from "./hooks";
 import { Overview } from "./views/Overview";
 import { Playground } from "./views/Playground";
 import { Providers } from "./views/Providers";
@@ -11,6 +11,7 @@ const TITLES = { overview: "Overview", playground: "Playground", requests: "Requ
 export default function App() {
   const route = useRoute();
   const { health, error } = useHealth();
+  const [theme, toggleTheme] = useTheme();
 
   useEffect(() => {
     document.title = `${TITLES[route]} · Sluice`;
@@ -18,7 +19,7 @@ export default function App() {
 
   return (
     <>
-      <Navbar route={route} health={health} healthError={error} />
+      <Navbar route={route} health={health} healthError={error} theme={theme} onToggleTheme={toggleTheme} />
       <main key={route}>
         {route === "overview" && <Overview />}
         {route === "playground" && <Playground health={health} />}

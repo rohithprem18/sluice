@@ -6,6 +6,19 @@
     <meta name="theme-color" content="#0a0a0a" />
     <meta name="description" content="Sluice: one OpenAI-compatible endpoint over free LLM providers, with fallback, semantic caching and PII redaction." />
     <title>Sluice</title>
+    <script>
+      // Set the theme before first paint: the stored choice wins, otherwise follow the OS.
+      (function () {
+        var t = null;
+        try {
+          t = localStorage.getItem("sluice.theme");
+        } catch (e) {}
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0a0a'/%3E%3Cpath d='M7 11h18M7 16h12M7 21h6' stroke='white' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

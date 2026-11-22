@@ -69,3 +69,57 @@ export function useHealth() {
   }, []);
   return { health, error };
 }
+
+export type Theme = "light" | "dark";
+
+const THEME_KEY = "sluice.theme";
+
+function initialTheme(): Theme {
+  // index.html sets data-theme before first paint; this is the React-side fallback
+  const attr = document.documentElement.dataset.theme;
+  if (attr === "light" || attr === "dark") return attr;
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+function systemTheme(): Theme {
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+/** The console theme: the stored choice wins, otherwise the system preference. */
+export function useTheme(): [Theme, () => void] {
+  const [theme, setTheme] = useState<Theme>(initialTheme);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    meta?.setAttribute("content", theme === "light" ? "#f6f7f9" : "#0a0a0a");
+  }, [theme]);
+
+  // follow the OS while the user has not picked a theme explicitly
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: light)");
+    const onChange = () => {
+      let stored: string | null = null;
+      try {
+        stored = localStorage.getItem(THEME_KEY);
+      } catch {
+        /* storage unavailable */
+      }
+      if (stored !== "light" && stored !== "dark") setTheme(systemTheme());
+    };
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+
+  const toggle = () =>
+    setTheme((t) => {
+      const next: Theme = t === "light" ? "dark" : "light";
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch {
+        /* storage unavailable */
+      }
+      return next;
+    });
+  return [theme, toggle];
+}
